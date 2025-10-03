@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>GrpcTesting</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+   <dependencies>
+       <!-- https://mvnrepository.com/artifact/io.grpc/grpc-stub -->
+       <dependency>
+           <groupId>io.grpc</groupId>
+           <artifactId>grpc-stub</artifactId>
+           <version>1.70.0</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/io.grpc/grpc-protobuf -->
+       <dependency>
+           <groupId>io.grpc</groupId>
+           <artifactId>grpc-protobuf</artifactId>
+           <version>1.70.0</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/io.grpc/grpc-netty-shaded -->
+       <dependency>
+           <groupId>io.grpc</groupId>
+           <artifactId>grpc-netty-shaded</artifactId>
+           <version>1.70.0</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/io.grpc/grpc-core -->
+       <dependency>
+           <groupId>io.grpc</groupId>
+           <artifactId>grpc-core</artifactId>
+           <version>1.70.0</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
+       <dependency>
+           <groupId>com.google.protobuf</groupId>
+           <artifactId>protobuf-java</artifactId>
+           <version>4.30.2</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-java -->
+       <dependency>
+           <groupId>io.cucumber</groupId>
+           <artifactId>cucumber-java</artifactId>
+           <version>7.20.1</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-java -->
+       <dependency>
+           <groupId>io.cucumber</groupId>
+           <artifactId>cucumber-junit</artifactId>
+           <version>7.20.1</version>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/junit/junit -->
+       <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <version>4.13.2</version>
+           <scope>test</scope>
+       </dependency>
+       <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util -->
+       <dependency>
+           <groupId>com.google.protobuf</groupId>
+           <artifactId>protobuf-java-util</artifactId>
+           <version>4.29.3</version>
+       </dependency>
+       <dependency>
+           <groupId>io.qameta.allure</groupId>
+           <artifactId>allure-cucumber7-jvm</artifactId>
+           <version>2.29.1</version>
+       </dependency>
+
+   </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Proto generation -->
+            <plugin>
+                <groupId>io.github.ascopes</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>src/main/proto</sourceDirectory>
+                    </sourceDirectories>
+                    <protocVersion>4.30.2</protocVersion>
+                    <binaryMavenPlugins>
+                        <binaryMavenPlugin>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-java</artifactId>
+                            <version>1.72.0</version>
+                            <options>jakarta_omit,@generated=omit</options>
+                        </binaryMavenPlugin>
+                    </binaryMavenPlugins>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals><goal>generate</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>Api</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.2.5</version>
+                        <configuration>
+                            <includes>
+                                <include>**/TestRunner.java</include>
+                            </includes>
+                            <testFailureIgnore>true</testFailureIgnore>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>net.masterthought</groupId>
+                        <artifactId>maven-cucumber-reporting</artifactId>
+                        <version>5.7.5</version>
+                        <executions>
+                            <execution>
+                                <id>execution</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <projectName>GrpcAutomation</projectName>
+                                    <outputDirectory>CucumberReport</outputDirectory>
+                                    <inputDirectory>target</inputDirectory>
+                                    <jsonFiles>
+                                        <param>**/cucumber.json</param>
+                                    </jsonFiles>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ApiRetry</id>
+            <activation>
+                <file>
+                    <exists>target/rerun.txt</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.2.5</version>
+                        <configuration>
+                            <includes>
+                                <include>**/TestReRunner.java</include>
+                            </includes>
+                            <testFailureIgnore>true</testFailureIgnore>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.masterthought</groupId>
+                        <artifactId>maven-cucumber-reporting</artifactId>
+                        <version>5.7.5</version>
+                        <executions>
+                            <execution>
+                                <id>execution</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <projectName>GrpcAutomation</projectName>
+                                    <outputDirectory>CucumberReports</outputDirectory>
+                                    <inputDirectory>target</inputDirectory>
+                                    <jsonFiles>
+                                        <param>**/rerun-cucumber.json</param>
+                                    </jsonFiles>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

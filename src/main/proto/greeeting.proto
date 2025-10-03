@@ -1,0 +1,62 @@
+syntax = "proto3";
+option java_package = "com.tp.greeting";
+service Greeter {
+   rpc greet (ClientInput) returns (ServerOutput);
+   rpc UserStatus(UsernameInput) returns (UserStatusOutput);
+   rpc LoginUser(LoginInput) returns (LoginResponse);
+   rpc Logout (LogoutRequest) returns (LogoutResponse);
+   rpc StreamGreetings (GreetingRequest) returns (stream GreetingResponse);
+   rpc ClientStreaming(stream RequestMessage) returns (ResponseMessage);
+   rpc chat(stream ChatMessage) returns (stream ChatResponse);
+}
+message ClientInput {
+   string greeting = 1;
+   string name = 2;
+}
+message ServerOutput {
+   string message = 1;
+}
+message UsernameInput{
+   string name=1;
+   string message=2;
+}
+message UserStatusOutput{
+   string status=1;
+   string message=2;
+}
+message LoginInput{
+   string username=1;
+   string password=2;
+}
+message LoginResponse{
+   string message=1;
+   string token=2;
+}
+message LogoutRequest {
+   string token = 1;
+}
+
+message LogoutResponse {
+   string message = 1;
+}
+message ChatMessage {
+   string from = 1;
+   string message = 2;
+}
+
+message ChatResponse {
+   string from = 1;
+   string reply = 2;
+}
+message GreetingRequest {
+   string name = 1;
+}
+message GreetingResponse {
+   string message = 1;
+}
+message RequestMessage {
+   string data = 1;
+}
+message ResponseMessage {
+   string result = 1;
+}
